@@ -1,0 +1,12 @@
+{
+    "applicationName": "deployview-backend",
+    "deploymentGroupName": "deployview-backend-dg",
+    "revision": {
+        "revisionType": "AppSpecContent",
+        "appSpecContent": {
+            "content": "ecs-deployment-bucket",
+            "sha265": "appspec.yaml",
+            "bundleType": "YAML"
+        }
+    }
+}
