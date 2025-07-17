@@ -26,7 +26,7 @@ jobs:
       run: go mod tidy
 
     - name: Build application
-      run: GOOS=linux GOARCH=amd64 go build -o app ./backend/main.go
+      run: GOOS=linux GOARCH=amd64 go build -o app ./main.go
 
     - name: Package application for CodeDeploy
       run: |
