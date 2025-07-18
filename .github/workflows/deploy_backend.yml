@@ -1,5 +1,4 @@
-name: Deploy Backend and Lambda to AWS
-
+name: Create backend Docker image
 on:
   push:
     branches:
@@ -7,6 +6,11 @@ on:
 
 jobs:
   deploy:
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+      deployments: write
     runs-on: ubuntu-latest
     defaults:
       run:
