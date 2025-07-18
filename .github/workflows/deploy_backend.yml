@@ -16,63 +16,19 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
-    - name: Set up Go
-      uses: actions/setup-go@v4
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
       with:
-        go-version: 1.24
-
-    - name: Install dependencies
-      run: go mod tidy
-
-    - name: Build application
-      run: GOOS=linux GOARCH=amd64 go build -o app ./main.go
-
-    - name: Package application for CodeDeploy
-      run: |
-        mkdir -p codedeploy
-        mv app codedeploy/
-        echo "version: 0.0" > codedeploy/appspec.yml
-        echo "os: linux" >> codedeploy/appspec.yml
-        echo "files:" >> codedeploy/appspec.yml
-        echo "  - source: ./app" >> codedeploy/appspec.yml
-        echo "    destination: /var/www/backend" >> codedeploy/appspec.yml
-        zip -r codedeploy.zip codedeploy
-
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v3
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Build and push
+      uses: docker/build-push-action@v6
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-
-    - name: Deploy with CodeDeploy
-      run: |
-        aws deploy create-deployment \
-          --application-name DeployViewBackendApp \
-          --deployment-group-name DeployViewBackendGroup \
-          --bundle-location codedeploy.zip
-
-    - name: Build Lambda function
-      run: GOOS=linux GOARCH=amd64 go build -o main ./backend/main.go
-
-    - name: Package Lambda function
-      run: zip lambda.zip main
-
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.11.0
-
-    - name: Initialize Terraform
-      run: terraform init
-      working-directory: ./terraform
-
-    - name: Apply Terraform
-      run: terraform apply -auto-approve
-      working-directory: ./terraform
-
-    - name: Clean up build artifacts
-      run: rm -f main lambda.zip codedeploy.zip
-
+        push: true
+        tags: ColtonHerrod/deployview-backend:latest
 
